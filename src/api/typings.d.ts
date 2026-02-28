@@ -109,7 +109,7 @@ declare namespace API {
     sortField?: string
     sortOrder?: string
     userAccount?: string
-    userName?: string
+    username?: string
     userProfile?: string
     userRole?: string
   }

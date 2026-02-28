@@ -3,10 +3,10 @@
     <!--    搜索框-->
     <a-form layout="inline" :model="searchParams" @finish="doSearch">
       <a-form-item label="账号">
-        <a-input v-model:value="searchParams.userAccount" placeholder="输入账号" />
+        <a-input v-model:value="searchParams.userAccount" placeholder="输入账号" allow-clear />
       </a-form-item>
       <a-form-item label="用户名">
-        <a-input v-model:value="searchParams.userName" placeholder="输入用户名" />
+        <a-input v-model:value="searchParams.userName" placeholder="输入用户名" allow-clear />
       </a-form-item>
       <a-form-item>
         <a-button type="primary" html-type="submit">搜索</a-button>
@@ -42,7 +42,7 @@
         <template v-else-if="column.key === 'action'">
           <a-space>
             <a-button type="primary">编辑</a-button>
-            <a-button type="primary" danger ghost>删除</a-button>
+            <a-button type="primary" @click="doDelete(record.id)" danger ghost>删除</a-button>
           </a-space>
         </template>
       </template>
@@ -52,8 +52,9 @@
 
 <script lang="ts" setup>
 import { computed, onMounted, reactive, ref } from 'vue'
-import { listUserVoByPageUsingPost } from '@/api/userController.ts'
+import { deleteUserUsingPost, listUserVoByPageUsingPost } from '@/api/userController.ts'
 import dayjs from 'dayjs'
+import { message } from 'ant-design-vue'
 const columns = [
   {
     title: 'id',
@@ -65,7 +66,7 @@ const columns = [
   },
   {
     title: '用户名',
-    dataIndex: 'userName',
+    dataIndex: 'username',
   },
   {
     title: '头像',
@@ -93,7 +94,7 @@ const total = ref<number>(0)
 // 搜索条件
 const searchParams = reactive<API.UserQueryRequest>({
   userAccount: '',
-  userName: '',
+  username: '',
   current: 1,
   pageSize: 10,
 })
@@ -134,5 +135,19 @@ const doSearch = async () => {
   // 重置页码
   searchParams.current = 1
   await searchParam()
+}
+
+// 删除
+const doDelete = async (id: number) => {
+  if (!id) {
+    return
+  }
+  const res = await deleteUserUsingPost({ id: id })
+  if (res.data.code === 0) {
+    message.success('删除成功')
+    await searchParam()
+  } else {
+    message.error('删除失败' + res.data.message)
+  }
 }
 </script>

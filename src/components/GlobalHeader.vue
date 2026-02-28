@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { h, ref } from 'vue'
+import { computed, h, ref } from 'vue'
 import { HomeOutlined } from '@ant-design/icons-vue'
 import { MenuProps, message } from 'ant-design-vue'
 import { useRoute, useRouter } from 'vue-router'
@@ -9,7 +9,9 @@ import { userLogoutUsingPost } from '@/api/userController.ts'
 
 // 当前选中菜单
 const current = ref<string[]>([])
-const items = ref<MenuProps['items']>([
+
+// 未经过滤的菜单项
+const originItems = [
   {
     key: '/',
     icon: () => h(HomeOutlined),
@@ -22,7 +24,7 @@ const items = ref<MenuProps['items']>([
     title: '关于',
   },
   {
-    key: '/user/manage',
+    key: '/admin/manage',
     label: '用户管理',
     title: '用户管理',
   },
@@ -31,7 +33,24 @@ const items = ref<MenuProps['items']>([
   //   label: h('a', { href: '#', target: '_blank' }, '关于小鱼'),
   //   title: '关于小鱼',
   // },
-])
+]
+
+// 已过滤的菜单项
+const items = computed(() => {
+  return filteredItems(originItems)
+})
+
+const userLogin = userLoginStore()
+
+// 过滤菜单项
+const filteredItems = (menus = [] as MenuProps['items']) => {
+  return menus?.filter((item) => {
+    if ((item?.key as string)?.startsWith('/admin') && userLogin.loginUser.userRole !== 'admin') {
+      return false
+    }
+    return true
+  })
+}
 
 const router = useRouter()
 const route = useRoute()
@@ -48,8 +67,6 @@ router.afterEach((to, from, next) => {
   current.value = [to.path]
 })
 
-const userLogin = userLoginStore()
-
 // 退出登录
 async function logout() {
   const res = await userLogoutUsingPost()
@@ -60,6 +77,11 @@ async function logout() {
   } else {
     message.error('退出失败' + res.data.message)
   }
+}
+
+// 个人中心
+function personSpace() {
+  // TODO
 }
 </script>
 
@@ -98,7 +120,7 @@ async function logout() {
                 <a-menu>
                   <a-menu-item>
                     <a href="javascript:;">
-                      <UserOutlined />
+                      <UserOutlined @click="personSpace" />
                       个人中心</a
                     >
                   </a-menu-item>
