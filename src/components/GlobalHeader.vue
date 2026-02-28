@@ -1,9 +1,11 @@
 <script lang="ts" setup>
 import { h, ref } from 'vue'
 import { HomeOutlined } from '@ant-design/icons-vue'
-import { MenuProps } from 'ant-design-vue'
-import { useRouter } from 'vue-router'
+import { MenuProps, message } from 'ant-design-vue'
+import { useRoute, useRouter } from 'vue-router'
 import { userLoginStore } from '@/stores/userLoginStore.ts'
+import { LogoutOutlined, UserOutlined } from '@ant-design/icons-vue'
+import { userLogoutUsingPost } from '@/api/userController.ts'
 
 // 当前选中菜单
 const current = ref<string[]>([])
@@ -19,6 +21,11 @@ const items = ref<MenuProps['items']>([
     label: '关于',
     title: '关于',
   },
+  {
+    key: '/user/manage',
+    label: '用户管理',
+    title: '用户管理',
+  },
   // {
   //   key: 'others',
   //   label: h('a', { href: '#', target: '_blank' }, '关于小鱼'),
@@ -27,6 +34,7 @@ const items = ref<MenuProps['items']>([
 ])
 
 const router = useRouter()
+const route = useRoute()
 
 // 路由跳转事件
 const doMenuClick = ({ key }: { key: string }) => {
@@ -41,7 +49,18 @@ router.afterEach((to, from, next) => {
 })
 
 const userLogin = userLoginStore()
-userLogin.fetchLoginUser()
+
+// 退出登录
+async function logout() {
+  const res = await userLogoutUsingPost()
+  if (res.data.code === 0) {
+    userLogin.setLoginUser({})
+    message.success('退出成功')
+    return
+  } else {
+    message.error('退出失败' + res.data.message)
+  }
+}
 </script>
 
 <template>
@@ -66,12 +85,36 @@ userLogin.fetchLoginUser()
         />
       </a-col>
 
-      <a-col flex="120px">
+      <a-col flex="150px">
         <div class="user-login-status">
+          <!-- 登录用户信息 -->
           <div v-if="userLogin.loginUser.id">
-            {{ userLogin.loginUser.username ?? '小鱼' }}
+            <a-dropdown>
+              <a-space>
+                <a-avatar :src="userLogin.loginUser.userAvatar" />
+                {{ userLogin.loginUser.username ?? '小鱼' }}
+              </a-space>
+              <template #overlay>
+                <a-menu>
+                  <a-menu-item>
+                    <a href="javascript:;">
+                      <UserOutlined />
+                      个人中心</a
+                    >
+                  </a-menu-item>
+                  <a-menu-item>
+                    <a href="javascript:;" @click="logout">
+                      <LogoutOutlined />
+                      退出登录</a
+                    >
+                  </a-menu-item>
+                </a-menu>
+              </template>
+            </a-dropdown>
           </div>
-          <a-button v-else type="primary" href="/user/login">登录</a-button>
+          <a-button v-else-if="route.path !== '/user/login'" type="primary" href="/user/login"
+            >登录</a-button
+          >
         </div>
       </a-col>
     </a-row>
