@@ -22,7 +22,6 @@ const router = useRouter()
 const route = useRoute()
 
 // 获取老数据
-
 const oldPicture = async () => {
   // 获取到id
   const id = route.query?.id
@@ -112,7 +111,6 @@ onMounted(() => {
         <a-textarea
           v-model:value="formData.introduction"
           placeholder="请输入简介"
-          :rows="2"
           :auto-size="{ minRows: 2, maxRows: 4 }"
           allow-clear
         />
@@ -135,7 +133,7 @@ onMounted(() => {
         />
       </a-form-item>
       <a-form-item>
-        <a-button type="primary" style="width: 100%" html-type="submit">搜索</a-button>
+        <a-button type="primary" style="width: 100%" html-type="submit">创建</a-button>
       </a-form-item>
       <div style="margin-bottom: 20px"></div>
     </a-form>
