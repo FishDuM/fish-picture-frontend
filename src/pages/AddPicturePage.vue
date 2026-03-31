@@ -9,7 +9,7 @@ import {
 } from '@/api/pictureController.ts'
 import { useRoute, useRouter } from 'vue-router'
 
-const picture = ref<API.PictureVO>()
+const picture = ref()
 const onSuccess = (newPicture: API.PictureVO) => {
   picture.value = newPicture
   formData.name = newPicture.name
