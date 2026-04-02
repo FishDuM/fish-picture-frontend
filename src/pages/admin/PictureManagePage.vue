@@ -134,7 +134,11 @@
           </a-form-item>
 
           <a-form-item>
-            <a-button style="width: 100%" type="primary" @click="doSearchAllByUrl"
+            <a-button
+              style="width: 100%"
+              type="primary"
+              @click="doSearchAllByUrl"
+              :loading="isLoading"
               >批量抓取</a-button
             >
           </a-form-item>
@@ -298,11 +302,17 @@ const searchAllUrl = ref<API.PictureUploadByBatchRequest>({
 })
 
 const doSearchAllByUrl = async () => {
+  isLoading.value = true
   const res = await uploadPictureByBatchUsingPost(searchAllUrl.value)
   if (res.data.code === 0) {
+    isLoading.value = false
     message.success('批量获取成功')
+    activeKey.value = '1'
   } else {
+    isLoading.value = false
     message.error('批量获取失败' + res.data.message)
   }
 }
+
+const isLoading = ref(false)
 </script>
