@@ -159,6 +159,7 @@ import {
 import dayjs from 'dayjs'
 import { message } from 'ant-design-vue'
 import { PIC_REVIEW_STATUS_ENUM, PIC_REVIEW_STATUS_MAP } from '@/constants/picture.ts'
+import router from '@/router'
 const columns = [
   {
     title: 'id',
@@ -307,7 +308,7 @@ const doSearchAllByUrl = async () => {
   if (res.data.code === 0) {
     isLoading.value = false
     message.success('批量获取成功')
-    activeKey.value = '1'
+    await router.push('/')
   } else {
     isLoading.value = false
     message.error('批量获取失败' + res.data.message)
