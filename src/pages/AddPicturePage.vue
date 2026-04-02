@@ -6,6 +6,7 @@ import {
   editPictureUsingPost,
   getPictureByIdUsingGet,
   listPictureTagCategoryUsingGet,
+  uploadPictureByUrlUsingPost,
 } from '@/api/pictureController.ts'
 import { useRoute, useRouter } from 'vue-router'
 
@@ -90,6 +91,27 @@ const getTagCategoryOptions = async () => {
   }
 }
 
+const activeKey = ref('1')
+const url = ref<string>('')
+const submitUrl = async () => {
+  // 获取老id
+  const id = route.query?.id
+  const res = await uploadPictureByUrlUsingPost({
+    id: id,
+    fileUrl: url.value,
+  })
+  if (res.data.code === 0 && res.data.data) {
+    message.success('上传成功')
+    picture.value = res.data.data
+    formData.name = res.data.data.name
+    formData.introduction = res.data.data.introduction
+    formData.category = res.data.data.category
+    formData.tags = res.data.data.tags
+  } else {
+    message.error('上传失败，' + res.data.message)
+  }
+}
+
 onMounted(() => {
   getTagCategoryOptions()
 })
@@ -100,8 +122,27 @@ onMounted(() => {
     <h2 style="margin-bottom: 16px">
       {{ route.query?.id ? '修改图片' : '添加图片' }}
     </h2>
-    <!-- 图片上传组件 -->
-    <PictureUpload :picture="picture" :onSuccess="onSuccess" />
+
+    <a-tabs v-model:activeKey="activeKey">
+      <a-tab-pane key="1" tab="本地上传图片">
+        <!-- 图片上传组件 -->
+        <PictureUpload :picture="picture" :onSuccess="onSuccess"
+      /></a-tab-pane>
+      <a-tab-pane key="2" tab="URL上传图片">
+        <a-input-group compact>
+          <a-input
+            v-model:value="url"
+            placeholder="请输入图片的url"
+            style="width: calc(100% - 120px)"
+          />
+          <a-button type="primary" style="width: 120px" @click="submitUrl">确定</a-button>
+        </a-input-group>
+        <div style="margin: 15px auto; text-align: center">
+          <a-image style="max-width: 720px" :src="url" />
+        </div>
+      </a-tab-pane>
+    </a-tabs>
+
     <!-- 图片信息表单 -->
     <a-form v-if="picture" layout="vertical" :model="formData" @finish="handelSubmit">
       <a-form-item name="name" label="名称">
