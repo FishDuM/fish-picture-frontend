@@ -308,7 +308,9 @@ const doSearchAllByUrl = async () => {
   if (res.data.code === 0) {
     isLoading.value = false
     message.success('批量获取成功')
-    await router.push('/')
+    await router.push({
+      path: '/',
+    })
   } else {
     isLoading.value = false
     message.error('批量获取失败' + res.data.message)
