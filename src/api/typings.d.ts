@@ -155,6 +155,7 @@ declare namespace API {
     reviewstatus?: number
     reviewtime?: string
     tags?: string
+    thumbnailurl?: string
     updateTime?: string
     url?: string
     userId?: number
@@ -228,6 +229,7 @@ declare namespace API {
     picSize?: number
     picWidth?: number
     tags?: string[]
+    thumbnailurl?: string
     updateTime?: string
     url?: string
     user?: UserVO

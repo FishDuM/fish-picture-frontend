@@ -54,7 +54,7 @@
         >
           <template #bodyCell="{ column, record }">
             <template v-if="column.dataIndex === 'url'">
-              <a-image style="width: 50px" :src="record.url" />
+              <a-image style="width: 50px" :src="record.thumbnailurl ?? record.url" />
             </template>
 
             <template v-if="column.dataIndex === 'tags'">
