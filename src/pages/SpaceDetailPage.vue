@@ -1,11 +1,34 @@
 <script setup lang="ts">
+import { getSpaceVoByIdUsingGet } from '@/api/spaceController.ts'
+import { message } from 'ant-design-vue'
 import { onMounted, reactive, ref } from 'vue'
 import {
   listPictureTagCategoryUsingGet,
   listPictureVoByPageUsingPost,
 } from '@/api/pictureController.ts'
-import { message } from 'ant-design-vue'
 import PictureList from '@/components/PictureList.vue'
+import { formatSize } from '@/utils'
+
+const props = defineProps<{
+  id: number
+}>()
+const space = ref<API.SpaceVO>({})
+
+// 获取空间详情
+const fetchSpaceDetail = async () => {
+  try {
+    const res = await getSpaceVoByIdUsingGet({
+      id: props.id,
+    })
+    if (res.data.code === 0 && res.data.data) {
+      space.value = res.data.data
+    } else {
+      message.error('获取空间详情失败，' + res.data.message)
+    }
+  } catch (e: any) {
+    message.error('获取空间详情失败：' + e.message)
+  }
+}
 
 // 定义数据
 const dataList = ref<API.PictureVO[]>([])
@@ -13,6 +36,7 @@ const total = ref(0)
 
 // 搜索条件
 const searchParams = reactive<API.PictureQueryRequest>({
+  spaceId: props.id,
   current: 1,
   pageSize: 12,
   sortOrder: 'descend',
@@ -44,11 +68,6 @@ const fetchData = async () => {
   loading.value = false
 }
 
-// 页面加载时添加数据
-onMounted(() => {
-  fetchData()
-})
-
 // 分页参数
 const onPageChange = (page: number, pageSize: number) => {
   searchParams.current = page
@@ -57,12 +76,6 @@ const onPageChange = (page: number, pageSize: number) => {
 }
 
 const loading = ref(true)
-
-const onSearch = () => {
-  // 重置搜索条件
-  searchParams.current = 1
-  fetchData()
-}
 
 // 标签和分类列表
 const categoryList = ref<string[]>([])
@@ -82,18 +95,46 @@ const getTagCategoryOptions = async () => {
   }
 }
 
+const onSearch = () => {
+  // 重置搜索条件
+  searchParams.current = 1
+  fetchData()
+}
+
 onMounted(() => {
+  onSearch()
+  fetchSpaceDetail()
   getTagCategoryOptions()
 })
 </script>
 
 <template>
-  <div id="homePages">
+  <div id="spaceDetailPage">
+    <!-- 空间信息 -->
+    <a-flex style="margin-bottom: 20px" justify="space-between">
+      <h2>{{ space.spaceName }} （私有空间）</h2>
+      <a-space :size="50">
+        <a-button type="primary" :href="`/add_picture?spaceId=${id}`" target="_blank"
+          >添加图片</a-button
+        >
+        <a-tooltip
+          placement="topRight"
+          :title="`当前占用空间大小：${formatSize(space.totalSize)} / ${formatSize(space.maxSize)} `"
+        >
+          <a-progress
+            type="circle"
+            :percent="((space.totalSize * 100) / space.maxSize).toFixed(1)"
+            :size="40"
+          />
+        </a-tooltip>
+      </a-space>
+    </a-flex>
+
     <!-- 搜索框 -->
-    <div class="search-bar">
+    <div class="search-bar" style="margin-bottom: 30px">
       <a-input-search
         v-model:value="searchParams.searchText"
-        placeholder="从海量图片中搜索"
+        placeholder="从空间图片中搜索"
         enter-button="搜索"
         size="large"
         @search="onSearch"
@@ -105,7 +146,7 @@ onMounted(() => {
       <a-tab-pane v-for="category in categoryList" :key="category" :tab="category" />
     </a-tabs>
     <!-- 标签栏 -->
-    <div class="tag-bar">
+    <div class="tag-bar" style="margin-bottom: 25px">
       <span style="margin-right: 8px">标签：</span>
       <a-space :size="[0, 8]" wrap>
         <a-checkable-tag
@@ -132,16 +173,7 @@ onMounted(() => {
 </template>
 
 <style scoped>
-#homePages {
+#spaceDetailPage {
   margin-bottom: 16px;
-}
-
-#homePages .search-bar {
-  max-width: 480px;
-  margin: 0 auto 16px;
-}
-
-.tag-bar {
-  margin-bottom: 20px;
 }
 </style>

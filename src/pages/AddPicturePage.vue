@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import PictureUpload from '@/components/PictureUpload.vue'
-import { onMounted, reactive, ref } from 'vue'
+import { computed, onMounted, reactive, ref } from 'vue'
 import { message } from 'ant-design-vue'
 import {
   editPictureUsingPost,
@@ -45,6 +45,10 @@ onMounted(() => {
   oldPicture()
 })
 
+const spaceId = computed(() => {
+  return route.query?.spaceId
+})
+
 const handelSubmit = async (values: any) => {
   const pictureId = picture.value?.id
   if (!pictureId) {
@@ -53,6 +57,7 @@ const handelSubmit = async (values: any) => {
   }
   const res = await editPictureUsingPost({
     id: pictureId,
+    spaceId: spaceId.value,
     ...values,
   })
   if (res.data.code === 0 && res.data.data) {
@@ -97,7 +102,8 @@ const submitUrl = async () => {
   // 获取老id
   const id = route.query?.id
   const res = await uploadPictureByUrlUsingPost({
-    id: id,
+    id: Number(id),
+    spaceId: Number(spaceId),
     fileUrl: url.value,
   })
   if (res.data.code === 0 && res.data.data) {
@@ -122,7 +128,9 @@ onMounted(() => {
     <h2 style="margin-bottom: 16px">
       {{ route.query?.id ? '修改图片' : '添加图片' }}
     </h2>
-
+    <a :href="`/space/${spaceId}`" target="_blank"
+      ><p v-if="spaceId">保存到空间：{{ spaceId }}</p></a
+    >
     <a-tabs v-model:activeKey="activeKey">
       <a-tab-pane key="1" tab="本地上传图片">
         <!-- 图片上传组件 -->
